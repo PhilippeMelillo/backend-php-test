@@ -32,5 +32,10 @@
             </form>
         </tr>
     </table>
+    {% for notice in app.session.flashbag.get('confirmation') %}
+    <div class="confirmation-message">
+      <div class="notice"><strong>{{ notice }}</strong></div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}
