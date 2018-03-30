@@ -85,10 +85,11 @@ $app->match('/todo/delete/{id}', function ($id) use ($app) {
 });
 
 $app->match('/todo/complete/{id}', function ($id) use ($app) {
-    // $sql = "UPDATE todos SET completed = 1 WHERE id = '$id'";
-    // $app['db']->executeUpdate($sql);
-
     TodoORM::mark_as_completed($app,$id);
-
     return $app->redirect('/todo');
+});
+
+$app->match('/todo/{id}/json', function ($id) use ($app) {
+    $todo = TodoORM::get_todo($app,$id);
+    return json_encode($todo);
 });
