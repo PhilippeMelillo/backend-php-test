@@ -52,10 +52,27 @@ $app->get('/todo/{id}', function ($id) use ($app) {
             'todo' => $todo,
         ]);
     } else {
-        $todos = TodoORM::get_todos($app, $user['id']);
-        return $app['twig']->render('todos.html', [
+
+        if(isset($_GET['p']) && is_numeric($_GET['p']) ){
+            $page_number = intval( $_GET['p'] ) ;
+        } else {
+            $page_number = 1;
+        }
+        $page_size = 2;
+        $offset = ($page_number-1) * $page_size;
+
+        $total_todos = TodoORM::get_total_count($app, $user['id']);
+
+        $pagination = pagination($page_number,$page_size, $total_todos);
+        
+        $todos = TodoORM::get_todos($app, $user['id'], $offset,$page_size);
+     
+         return $app['twig']->render('todos.html', [
             'todos' => $todos,
-        ]);
+            'next' => $pagination['next'],
+            'previous' => $pagination['previous'],
+            'pages' => $pagination['pages']
+         ]);
     }
 })
 ->value('id', null);
@@ -95,3 +112,25 @@ $app->match('/todo/{id}/json', function ($id) use ($app) {
     $todo = TodoORM::get_todo($app,$id);
     return json_encode($todo);
 });
+
+function pagination($page_number,$page_size,$total_todos){
+    $previous = null;
+    if(($page_number - 1)>0){
+        $previous = '?p=' . ($page_number - 1);
+    }
+    $next = null;
+    if($total_todos > ($page_number * $page_size)){
+        $next = '?p=' . ($page_number + 1);
+    }
+    $number_of_pages = ceil($total_todos / $page_size);
+    $pages = array();
+    for($i = 1; $i <= $number_of_pages; $i++ ){
+        $link_text =$i;
+        $class = "";
+        if($i == $page_number){
+            $class = "active";
+        }
+        array_push($pages, array('link_text'=> $link_text , 'link' => '?p=' . $i, 'class' => $class));
+    }
+    return array('pages' => $pages, 'previous' => $previous, 'next' => $next);
+}

@@ -16,13 +16,15 @@ class TodoORM {
         return $results[0];
     }
 
-    public function get_todos($app, $user_id){
+    public function get_todos($app, $user_id, $offset, $pagesize){
         $qb = $app['db']->createQueryBuilder();
         $qb->select('*')
         ->from('todos')
         ->where(
             $qb->expr()->eq('user_id', $user_id)
-            );
+            )
+        ->setMaxResults($pagesize)
+        ->setFirstResult($offset);
         $results = $qb->execute()->fetchAll();
         return $results;
     }
@@ -53,7 +55,19 @@ class TodoORM {
         ->where(
             $qb->expr()->eq('id', $id)
         );
-        
+
         $app['db']->executeUpdate($qb->getSQL());
+    }
+
+    public function get_total_count($app, $user_id){
+        $qb = $app['db']->createQueryBuilder();
+        $qb->select('count(*) as total')
+        ->from('todos')
+        ->where(
+            $qb->expr()->eq('user_id', $user_id)
+            );
+        $results = $qb->execute()->fetchAll();
+
+        return $results[0]['total'];
     }
 }
