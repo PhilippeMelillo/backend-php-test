@@ -69,7 +69,11 @@ $app->post('/todo/add', function (Request $request) use ($app) {
     $user_id = $user['id'];
     $description = $request->get('description');
 
-    TodoORM::add_todo($app, $description, $user_id);
+    if(!isset($description) || trim($description) == ''){
+        $app['session']->getFlashBag()->add('empty_description', 'You need a description for the note');
+    }else{
+        TodoORM::add_todo($app, $description, $user_id);
+    }
     
     return $app->redirect('/todo');
 });
