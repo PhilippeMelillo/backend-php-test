@@ -83,3 +83,12 @@ $app->match('/todo/delete/{id}', function ($id) use ($app) {
     TodoORM::delete_todo($app,$id);
     return $app->redirect('/todo');
 });
+
+$app->match('/todo/complete/{id}', function ($id) use ($app) {
+    // $sql = "UPDATE todos SET completed = 1 WHERE id = '$id'";
+    // $app['db']->executeUpdate($sql);
+
+    TodoORM::mark_as_completed($app,$id);
+
+    return $app->redirect('/todo');
+});

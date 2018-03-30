@@ -46,4 +46,14 @@ class TodoORM {
         $app['db']->executeUpdate($qb->getSQL());
     }
 
+    public function mark_as_completed($app, $id){
+        $qb = $app['db']->createQueryBuilder();
+        $qb->update('todos')
+        ->set('completed', true)
+        ->where(
+            $qb->expr()->eq('id', $id)
+        );
+        
+        $app['db']->executeUpdate($qb->getSQL());
+    }
 }
