@@ -21,16 +21,15 @@ $app->get('/', function () use ($app) {
 $app->match('/login', function (Request $request) use ($app) {
     $username = $request->get('username');
     $password = $request->get('password');
-
     if ($username) {
-       $user = UserORM::get_user($app,$username,$password);
-
-        if ($user){
-            $app['session']->set('user', $user);
-            return $app->redirect('/todo');
+       $user = UserORM::get_user($app, $username, $password);
+       if($user){
+            if (password_verify($password, $user['password'])){
+                $app['session']->set('user', $user);
+                return $app->redirect('/todo');
+            }
         }
     }
-
     return $app['twig']->render('login.html', array());
 });
 
