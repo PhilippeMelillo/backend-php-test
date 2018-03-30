@@ -3,6 +3,7 @@
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+
 $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
     $twig->addGlobal('user', $app['session']->get('user'));
 
@@ -22,8 +23,7 @@ $app->match('/login', function (Request $request) use ($app) {
     $password = $request->get('password');
 
     if ($username) {
-        $sql = "SELECT * FROM users WHERE username = '$username' and password = '$password'";
-        $user = $app['db']->fetchAssoc($sql);
+       $user = UserORM::get_user($app,$username,$password);
 
         if ($user){
             $app['session']->set('user', $user);
@@ -45,18 +45,14 @@ $app->get('/todo/{id}', function ($id) use ($app) {
     if (null === $user = $app['session']->get('user')) {
         return $app->redirect('/login');
     }
-
+    
     if ($id){
-        $sql = "SELECT * FROM todos WHERE id = '$id'";
-        $todo = $app['db']->fetchAssoc($sql);
-
+        $todo = TodoORM::get_todo($app, $id);
         return $app['twig']->render('todo.html', [
             'todo' => $todo,
         ]);
     } else {
-        $sql = "SELECT * FROM todos WHERE user_id = '${user['id']}'";
-        $todos = $app['db']->fetchAll($sql);
-
+        $todos = TodoORM::get_todos($app, $user['id']);
         return $app['twig']->render('todos.html', [
             'todos' => $todos,
         ]);
@@ -73,17 +69,13 @@ $app->post('/todo/add', function (Request $request) use ($app) {
     $user_id = $user['id'];
     $description = $request->get('description');
 
-    $sql = "INSERT INTO todos (user_id, description) VALUES ('$user_id', '$description')";
-    $app['db']->executeUpdate($sql);
-
+    TodoORM::add_todo($app, $description, $user_id);
+    
     return $app->redirect('/todo');
 });
 
 
 $app->match('/todo/delete/{id}', function ($id) use ($app) {
-
-    $sql = "DELETE FROM todos WHERE id = '$id'";
-    $app['db']->executeUpdate($sql);
-
+    TodoORM::delete_todo($app,$id);
     return $app->redirect('/todo');
 });
