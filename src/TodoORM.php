@@ -39,21 +39,27 @@ class TodoORM {
         $app['db']->executeUpdate($qb->getSQL());
     }
 
-    public function delete_todo($app, $id){
+    public function delete_todo($app, $id, $user){
         $qb = $app['db']->createQueryBuilder();
         $qb->delete('todos')
         ->where(
             $qb->expr()->eq('id', $id)
-            );
-        $app['db']->executeUpdate($qb->getSQL());
+            )
+        ->andWhere(
+            $qb->expr()->eq('user_id', $user['id'])
+        );
+        return $app['db']->executeUpdate($qb->getSQL());
     }
 
-    public function mark_as_completed($app, $id){
+    public function mark_as_completed($app, $id, $user){
         $qb = $app['db']->createQueryBuilder();
         $qb->update('todos')
         ->set('completed', true)
         ->where(
             $qb->expr()->eq('id', $id)
+        )
+        ->andWhere(
+            $qb->expr()->eq('user_id', $user['id'])
         );
 
         $app['db']->executeUpdate($qb->getSQL());

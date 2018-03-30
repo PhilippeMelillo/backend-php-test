@@ -97,18 +97,28 @@ $app->post('/todo/add', function (Request $request) use ($app) {
 
 
 $app->match('/todo/delete/{id}', function ($id) use ($app) {
-    TodoORM::delete_todo($app,$id);
-    $app['session']->getFlashBag()->add('confirmation', 'You deleted todo with id ' . $id);
+    if (null === $user = $app['session']->get('user')) {
+        return $app->redirect('/login');
+    }
+    if(TodoORM::delete_todo($app, $id, $user)){
+        $app['session']->getFlashBag()->add('confirmation', 'You deleted todo with id ' . $id);
+    }
     return $app->redirect('/todo');
 });
 
 $app->match('/todo/complete/{id}', function ($id) use ($app) {
-    TodoORM::mark_as_completed($app,$id);
+    if (null === $user = $app['session']->get('user')) {
+        return $app->redirect('/login');
+    }
+    TodoORM::mark_as_completed($app, $id, $user);
     return $app->redirect('/todo');
 });
 
 $app->match('/todo/{id}/json', function ($id) use ($app) {
-    $todo = TodoORM::get_todo($app,$id);
+    if (null === $user = $app['session']->get('user')) {
+        return $app->redirect('/login');
+    }
+    $todo = TodoORM::get_todo($app, $id, $user);
     return json_encode($todo);
 });
 
