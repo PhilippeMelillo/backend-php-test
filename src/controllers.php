@@ -73,6 +73,7 @@ $app->post('/todo/add', function (Request $request) use ($app) {
         $app['session']->getFlashBag()->add('empty_description', 'You need a description for the note');
     }else{
         TodoORM::add_todo($app, $description, $user_id);
+        $app['session']->getFlashBag()->add('confirmation', 'You created todo with description : ' . $description);
     }
     
     return $app->redirect('/todo');
@@ -81,6 +82,7 @@ $app->post('/todo/add', function (Request $request) use ($app) {
 
 $app->match('/todo/delete/{id}', function ($id) use ($app) {
     TodoORM::delete_todo($app,$id);
+    $app['session']->getFlashBag()->add('confirmation', 'You deleted todo with id ' . $id);
     return $app->redirect('/todo');
 });
 
